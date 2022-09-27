@@ -46,4 +46,22 @@ const getUser = (id: string): IUser | any =>
 const getUsersInRoom = (room: string) =>
     users.filter((user) => user.room === room);
 
-export { addUser, removeUser, getUser, getUsersInRoom };
+interface IComputeResponse {
+    success: boolean;
+    message: string;
+    data?: any;
+}
+
+function ComputeResponse(
+    success: boolean,
+    message: string,
+    data?: any
+): IComputeResponse {
+    return {
+        success,
+        message,
+        data,
+    };
+}
+
+export { addUser, removeUser, getUser, getUsersInRoom, ComputeResponse };
