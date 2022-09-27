@@ -5,17 +5,18 @@ export enum HTTPStatusCode {
     BAD_REQUEST = 400,
     UNAUTHORIZED = 401,
     FORBIDDEN = 403,
+    SERVER_ERROR = 500,
 }
 
-const users: IRoom[] = [];
+const users: IUser[] = [];
 
-interface IRoom {
+interface IUser {
     id: string;
     name: string;
     room: string;
 }
 
-const addUser = ({ id, name, room }: IRoom) => {
+const addUser = ({ id, name, room }: IUser): IUser | any => {
     name = name.trim().toLowerCase();
     room = room.trim().toLowerCase();
 
@@ -26,7 +27,7 @@ const addUser = ({ id, name, room }: IRoom) => {
     if (!name || !room) return { error: "Username and room are required." };
     if (existingUser) return { error: "Username is taken." };
 
-    const user = { id, name, room };
+    const user: IUser = { id, name, room };
 
     users.push(user);
 
@@ -39,7 +40,8 @@ const removeUser = (id: string) => {
     if (index !== -1) return users.splice(index, 1)[0];
 };
 
-const getUser = (id: string) => users.find((user) => user.id === id);
+const getUser = (id: string): IUser | any =>
+    users.find((user) => user.id === id);
 
 const getUsersInRoom = (room: string) =>
     users.filter((user) => user.room === room);
