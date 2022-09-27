@@ -22,22 +22,24 @@ model User {
 }
 
 model Message {
-  id           String @id @default(uuid())
-  content      String
-  senderId     String
-  sender       User   @relation(fields: [senderId], references: [id])
-  receipientId String
-  createdAt    String
+  id        String   @id @default(uuid())
+  content   String
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id])
+  room      Room?    @relation(fields: [roomId], references: [id])
+  roomId    String?
+  createdAt DateTime @default(now()) @db.Timestamp(6)
 }
 
 model Room {
-  id           String   @id @default(uuid())
-  name         String   @unique @db.VarChar(25)
-  description  String   @db.VarChar(100)
+  id           String    @id @default(uuid())
+  name         String    @unique @db.VarChar(25)
+  description  String    @db.VarChar(100)
   admin        String
   avatar       String
   users        User[]
+  messages     Message[]
   messageCount Int
-  createdAt    DateTime @default(now()) @db.Timestamp(6)
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt    DateTime  @updatedAt
 }

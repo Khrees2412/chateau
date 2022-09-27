@@ -117,6 +117,23 @@ const getRoomMembers = async (req: Request, res: Response) => {
         res.json(ComputeResponse(false, "Error occurred", error));
     }
 };
+
+const getSocketRoomMembers = async (room: string): Promise<any> => {
+    try {
+        const members = await prisma.room.findFirst({
+            include: {
+                users: true,
+            },
+            where: {
+                name: String(room),
+            },
+        });
+        return members;
+    } catch (error: any) {
+        return new Error(error);
+    }
+};
+
 const addUserToRoom = async (user: User, room: Room): Promise<any> => {
     try {
         await prisma.room.update({
@@ -135,6 +152,24 @@ const addUserToRoom = async (user: User, room: Room): Promise<any> => {
     }
 };
 
+const removeUserFromRoom = async (user: User, room: string): Promise<any> => {
+    try {
+        await prisma.room.update({
+            where: {
+                name: room,
+            },
+            data: {
+                users: {
+                    delete: user,
+                },
+            },
+        });
+        return "Removed user from room";
+    } catch (error: any) {
+        return new Error(error);
+    }
+};
+
 export {
     createRoom,
     getRoom,
@@ -142,4 +177,5 @@ export {
     deleteRoom,
     updateRoom,
     addUserToRoom,
+    removeUserFromRoom,
 };

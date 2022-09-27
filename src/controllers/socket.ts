@@ -8,6 +8,7 @@ import {
     getUser,
     getUsersInRoom,
 } from "../misc";
+import { addMessage } from "./message";
 import { getRoom } from "./room";
 
 const prisma = new PrismaClient();
@@ -40,16 +41,25 @@ const connection = (io: Server) => {
                 .in(room)
                 .emit("joined-room", `${user?.username} has joined the room`);
 
-            socket.on("sendMessage", (message, callback) => {
-                const user = getUser(socket.id);
+            socket.on(
+                "sendMessage",
+                async ({ message, userId, room }, callback) => {
+                    const user = await prisma.user.findFirst({
+                        where: {
+                            id: userId,
+                        },
+                    });
+                    if (user) {
+                        await addMessage(message, room, user.id);
 
-                io.sockets.to(user.room).emit("message", {
-                    user: user.name,
-                    text: message,
-                });
-
-                callback();
-            });
+                        io.sockets.to(room).emit("message", {
+                            user,
+                            message,
+                        });
+                        callback();
+                    }
+                }
+            );
         });
 
         socket.on("disconnect", () => {
