@@ -15,7 +15,7 @@ model User {
   avatar       String?
   username     String    @unique @db.VarChar(15)
   messages     Message[]
-  Rooms        Room[]
+  rooms        Room[]
   createdAt    DateTime  @default(now()) @db.Timestamp(6)
   updatedAt    DateTime  @updatedAt
   refreshToken String?
@@ -40,5 +40,4 @@ model Room {
   messageCount Int
   createdAt    DateTime @default(now()) @db.Timestamp(6)
   updatedAt    DateTime @updatedAt
-  userId       String
 }

@@ -8,55 +8,59 @@ import {
     getUser,
     getUsersInRoom,
 } from "../misc";
+import { getRoom } from "./room";
 
 const prisma = new PrismaClient();
 
 const connection = (io: Server) => {
-    io.on("connect", (socket) => {
-        socket.on("join", ({ name, room }, callback) => {
-            const { error, user } = addUser({ id: socket.id, name, room });
-
-            if (error) return callback(error);
-
-            socket.join(user.room);
-
-            socket.emit("message", {
-                user: "admin",
-                text: `${user.name}, welcome to room ${user.room}.`,
+    io.sockets.on("connect", (socket) => {
+        socket.on("join-room", async ({ userId, room }) => {
+            const findRoom = getRoom(room);
+            if (!findRoom) {
+                socket.disconnect();
+            }
+            const user = await prisma.user.findFirst({
+                where: {
+                    id: userId,
+                },
             });
-            socket.broadcast.to(user.room).emit("message", {
-                user: "admin",
-                text: `${user.name} has joined!`,
+            await prisma.user.update({
+                where: {
+                    id: userId,
+                },
+                data: {
+                    rooms: {
+                        create: room,
+                    },
+                },
             });
+            socket.join(room);
 
-            io.to(user.room).emit("roomData", {
-                room: user.room,
-                users: getUsersInRoom(user.room),
+            io.sockets
+                .in(room)
+                .emit("joined-room", `${user?.username} has joined the room`);
+
+            socket.on("sendMessage", (message, callback) => {
+                const user = getUser(socket.id);
+
+                io.sockets.to(user.room).emit("message", {
+                    user: user.name,
+                    text: message,
+                });
+
+                callback();
             });
-
-            callback();
-        });
-
-        socket.on("sendMessage", (message, callback) => {
-            const user = getUser(socket.id);
-
-            io.to(user.room).emit("message", {
-                user: user.name,
-                text: message,
-            });
-
-            callback();
         });
 
         socket.on("disconnect", () => {
             const user = removeUser(socket.id);
 
             if (user) {
-                io.to(user.room).emit("message", {
+                io.sockets.to(user.room).emit("message", {
                     user: "Admin",
                     text: `${user.name} has left.`,
                 });
-                io.to(user.room).emit("roomData", {
+                io.sockets.to(user.room).emit("roomData", {
                     room: user.room,
                     users: getUsersInRoom(user.room),
                 });

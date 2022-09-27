@@ -15,15 +15,20 @@ const app: Application = express();
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
-    /* options */
+    cors: {
+        origin,
+        methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+        credentials: true,
+    },
+    transports: ["polling", "websocket"],
 });
-
-connection(io);
 
 dotenv.config();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+connection(io);
 
 app.get("/", async (req: Request, res: Response): Promise<Response> => {
     return res.status(HTTPStatusCode.OK).send({
