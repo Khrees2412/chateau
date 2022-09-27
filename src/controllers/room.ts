@@ -1,4 +1,4 @@
-import { PrismaClient, Room } from "@prisma/client";
+import { PrismaClient, Room, User } from "@prisma/client";
 import { Request, Response } from "express";
 import { ComputeResponse } from "../misc";
 
@@ -15,8 +15,8 @@ const getRoom = async (name: string): Promise<any> => {
             return new Error("Room not found!");
         }
         return room;
-    } catch (error) {
-        return error;
+    } catch (error: any) {
+        return new Error(error);
     }
 };
 
@@ -24,7 +24,7 @@ const createRoom = async (req: Request, res: Response) => {
     const { name, description } = req.body;
     const image = req.file?.path;
     let userId;
-    if (res.locals.user) {
+    if (res.locals.userId) {
         userId = res.locals;
     }
     try {
@@ -38,9 +38,9 @@ const createRoom = async (req: Request, res: Response) => {
                 data: {
                     name,
                     description,
-                    avatar: String(image),
+                    avatar: image ? image : "",
                     messageCount: 0,
-                    admin: "",
+                    admin: user.username,
                     users: {
                         create: user,
                     },
@@ -50,12 +50,56 @@ const createRoom = async (req: Request, res: Response) => {
         } else {
             res.json(ComputeResponse(false, "Unable to find user"));
         }
-    } catch (error) {}
+    } catch (error) {
+        res.json(ComputeResponse(false, "Error occurred", error));
+    }
 };
 
-const deleteRoom = (req: Request, res: Response) => {};
+const deleteRoom = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    try {
+        await prisma.room.delete({
+            where: {
+                id,
+            },
+        });
+        res.json(ComputeResponse(true, "Room Deleted"));
+    } catch (error) {
+        res.json(ComputeResponse(false, "Unable to delete room", error));
+    }
+};
+interface IUpdateBody {
+    name?: string;
+    description?: string;
+    avatar?: string | undefined;
+}
 
-const updateRoom = (req: Request, res: Response) => {};
+const updateRoom = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { name, description } = req.body;
+    const avatar = req.file?.path;
+
+    const updateBody: IUpdateBody = {};
+    if (name) {
+        updateBody.name = name;
+    }
+    if (description) {
+        updateBody.description = description;
+    }
+    if (avatar) {
+        updateBody.avatar = avatar;
+    }
+
+    try {
+        const room = await prisma.room.update({
+            where: {
+                id,
+            },
+            data: updateBody,
+        });
+        res.json(ComputeResponse(true, "Room Updated", room.name));
+    } catch (error) {}
+};
 
 const getRoomMembers = async (req: Request, res: Response) => {
     const { room } = req.query;
@@ -73,6 +117,29 @@ const getRoomMembers = async (req: Request, res: Response) => {
         res.json(ComputeResponse(false, "Error occurred", error));
     }
 };
-const addUserToRoom = (req: Request, res: Response) => {};
+const addUserToRoom = async (user: User, room: Room): Promise<any> => {
+    try {
+        await prisma.room.update({
+            where: {
+                name: room.name,
+            },
+            data: {
+                users: {
+                    create: user,
+                },
+            },
+        });
+        return "Added user to room";
+    } catch (error: any) {
+        return new Error(error);
+    }
+};
 
-export { createRoom, getRoom, getRoomMembers };
+export {
+    createRoom,
+    getRoom,
+    getRoomMembers,
+    deleteRoom,
+    updateRoom,
+    addUserToRoom,
+};

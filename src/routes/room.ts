@@ -2,7 +2,13 @@ import { Router } from "express";
 import multer from "multer";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { v2 as cloudinary } from "cloudinary";
-import { getRoomMembers } from "../controllers/room";
+import {
+    createRoom,
+    deleteRoom,
+    getRoomMembers,
+    updateRoom,
+} from "../controllers/room";
+import { validateAuth } from "../middleware";
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_NAME,
@@ -17,6 +23,12 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({ storage: storage });
 
-const router = Router();
+const roomRouter = Router();
+roomRouter.use("/rooms");
 
-router.post("/room/members", upload.single("picture"), getRoomMembers);
+roomRouter.get("/members", validateAuth, getRoomMembers);
+roomRouter.post("/", validateAuth, upload.single("picture"), createRoom);
+roomRouter.delete("/:id", validateAuth, deleteRoom);
+roomRouter.put("/:id", validateAuth, updateRoom);
+
+export default roomRouter;

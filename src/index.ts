@@ -10,6 +10,7 @@ import {
 import { createServer } from "http";
 import { Server } from "socket.io";
 import connection from "./controllers/socket";
+import roomRouter from "./routes/room";
 
 const app: Application = express();
 
@@ -27,6 +28,8 @@ dotenv.config();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+app.use("/v1", roomRouter);
 
 connection(io);
 
