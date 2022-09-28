@@ -174,6 +174,7 @@ export {
     createRoom,
     getRoom,
     getRoomMembers,
+    getSocketRoomMembers,
     deleteRoom,
     updateRoom,
     addUserToRoom,

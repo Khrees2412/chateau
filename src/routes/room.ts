@@ -8,7 +8,7 @@ import {
     getRoomMembers,
     updateRoom,
 } from "../controllers/room";
-import { validateAuth } from "../middleware";
+import { validateAuth } from "../middlewares/auth";
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_NAME,
@@ -24,7 +24,6 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage: storage });
 
 const roomRouter = Router();
-roomRouter.use("/rooms");
 
 roomRouter.get("/members", validateAuth, getRoomMembers);
 roomRouter.post("/", validateAuth, upload.single("picture"), createRoom);
