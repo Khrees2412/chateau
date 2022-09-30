@@ -112,4 +112,4 @@ dist
 
 node_modules/
 
-/client
+/lib/client
