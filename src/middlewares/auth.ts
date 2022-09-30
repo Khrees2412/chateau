@@ -1,7 +1,8 @@
 import * as jwt from "jsonwebtoken";
 import { NextFunction, Request, Response } from "express";
-import { HTTPStatusCode } from "./misc";
+import { HTTPStatusCode } from "../misc";
 import { PrismaClient } from "@prisma/client";
+import logger from "../logger";
 
 const prisma = new PrismaClient();
 const jwtSecret = process.env.JWT_SECRET || "";
@@ -33,8 +34,8 @@ const validateAuth = async (
             next();
         }
     } catch (err) {
-        console.error("something wrong with auth middleware");
-        res.status(500).json({ msg: "Server Error" });
+        logger.error("something wrong with auth middleware");
+        res.status(HTTPStatusCode.SERVER_ERROR).json({ msg: "Server Error" });
     }
 };
 

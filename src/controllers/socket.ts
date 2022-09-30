@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { Server } from "socket.io";
+import logger from "../logger";
 
 import { addMessage } from "./message";
 import { getRoom, removeUserFromRoom } from "./room";
@@ -7,51 +8,51 @@ import { getRoom, removeUserFromRoom } from "./room";
 const prisma = new PrismaClient();
 
 const connection = (io: Server) => {
-    io.sockets.on("connect", (socket) => {
+    logger.info("CONNECTED TO IO");
+    io.on("connect", (socket) => {
+        logger.info("user connected to socket");
         socket.on("joinRoom", async ({ userId, room }) => {
-            const findRoom = getRoom(room);
-            if (!findRoom) {
-                socket.disconnect();
-            }
-            const user = await prisma.user.findFirst({
-                where: {
-                    id: userId,
-                },
-            });
-            await prisma.user.update({
-                where: {
-                    id: userId,
-                },
-                data: {
-                    rooms: {
-                        create: room,
-                    },
-                },
-            });
+            logger.info(`${userId} in ${room}`);
+
+            // const findRoom = getRoom(room);
+            // if (!findRoom) {
+            //     socket.disconnect();
+            // }
+            // const user = await prisma.user.findFirst({
+            //     where: {
+            //         id: userId,
+            //     },
+            // });
+            // await prisma.user.update({
+            //     where: {
+            //         id: userId,
+            //     },
+            //     data: {
+            //         rooms: {
+            //             create: room,
+            //         },
+            //     },
+            // });
             socket.join(room);
 
-            socket.broadcast
+            socket
                 .to(room)
-                .emit("roomMessage", `${user?.username} has joined the room`);
+                .emit("roomMessage", `${userId} has joined the room`);
         });
         socket.on(
             "sendMessage",
-            async ({ message, userId, room }, callback) => {
-                const user = await prisma.user.findFirst({
-                    where: {
-                        id: userId,
-                    },
-                });
-                if (user) {
-                    await addMessage(message, room, user.id);
+            async ({ message, userId, room }) => {
+                //     const user = await prisma.user.findFirst({
+                //         where: {
+                //             id: userId,
+                //         },
+                //     });
+                //     if (user) {
+                //         await addMessage(message, room, user.id);
 
-                    io.sockets.to(room).emit("message", {
-                        user,
-                        message,
-                    });
-                    callback();
-                }
+                io.to(room).emit("sendMessage", message);
             }
+            // }
         );
         socket.on("leaveRoom", async ({ userId, room }, callback) => {
             const user = await prisma.user.findFirst({

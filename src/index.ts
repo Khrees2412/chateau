@@ -3,12 +3,15 @@ import dotenv from "dotenv";
 import { HTTPStatusCode } from "./misc";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import * as Prometheus from "prom-client";
+import { collectDefaultMetrics, register, Histogram } from "prom-client";
 import connection from "./controllers/socket";
 import roomRouter from "./routes/room";
 import morganMiddleware from "./middlewares/morgan";
+import logger from "./logger";
+import path from "path";
 
 const app: Application = express();
+const dev = process.env.NODE_ENV !== "production";
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
@@ -17,24 +20,33 @@ const io = new Server(httpServer, {
         methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
         credentials: true,
     },
+    cookie: {
+        name: "chateau-socket-cookie",
+        httpOnly: true,
+        maxAge: 14 * 24 * 60 * 60 * 1000, // expires in 14 days
+        domain: dev ? "localhost" : "chateau-r0dz.onrender.com",
+        secure: dev ? false : true,
+    },
     transports: ["polling", "websocket"],
 });
 
 dotenv.config();
 
-const register = new Prometheus.Registry();
-
 register.setDefaultLabels({
     app: "chateau-realtime-chat",
 });
 
-Prometheus.collectDefaultMetrics({
+app.get("/room", (req, res) => {
+    res.sendFile(path.resolve(__dirname + "/client/index.html"));
+});
+
+collectDefaultMetrics({
     prefix: "node_",
     gcDurationBuckets: [0.001, 0.01, 0.1, 1, 2, 5],
     register,
 });
 
-const httpRequestDurationMicroseconds = new Prometheus.Histogram({
+const httpRequestDurationMicroseconds = new Histogram({
     name: "http_request_duration_ms",
     help: "Duration of HTTP requests in ms",
     labelNames: ["method", "route", "code"],
@@ -61,9 +73,13 @@ app.get("/", async (req: Request, res: Response): Promise<Response> => {
     });
 });
 
-app.get("/metrics", (req, res) => {
-    res.set("Content-Type", Prometheus.register.contentType);
-    res.end(Prometheus.register.metrics());
+app.get("/metrics", async (req: Request, res: Response) => {
+    try {
+        res.set("Content-Type", register.contentType);
+        res.end(await register.metrics());
+    } catch (error) {
+        res.status(HTTPStatusCode.SERVER_ERROR).end(error);
+    }
 });
 
 // Runs after each requests
@@ -79,7 +95,7 @@ app.use((req: Request, res: Response, next) => {
 
 const port = process.env.PORT || 5001;
 httpServer.listen(port, (): void => {
-    console.log(`Connected successfully on port ${port}`);
+    logger.info(`Connected successfully on port ${port}`);
 });
 
 // Graceful shutdown

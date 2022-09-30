@@ -11,7 +11,7 @@
         "start": "ts-node src/index.ts",
         "start:dev": "tsc --watch && cd dist && nodemon index",
         "test": "jest --watchAll --detectOpenHandles",
-        "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/server.js\""
+        "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\""
     },
     "dependencies": {
         "@prisma/client": "^4.3.1",
