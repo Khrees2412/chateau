@@ -8,10 +8,10 @@
     "license": "MIT",
     "scripts": {
         "build": "npx tsc",
-        "start": "ts-node src/index.ts",
+        "start": "ts-node lib/index.ts",
         "start:dev": "tsc --watch && cd dist && nodemon index",
         "test": "jest --watchAll --detectOpenHandles",
-        "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\""
+        "dev": "concurrently \"npx tsc --watch\" \"nodemon -q lib/index.ts\""
     },
     "dependencies": {
         "@prisma/client": "^4.3.1",
