@@ -7,7 +7,7 @@ export enum HTTPStatusCode {
     FORBIDDEN = 403,
     SERVER_ERROR = 500,
 }
-interface IComputeResponse {
+export interface IComputeResponse {
     success: boolean;
     message: string;
     data?: any;

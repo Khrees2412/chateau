@@ -4,9 +4,11 @@ import * as jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { HTTPStatusCode } from "../misc";
+import redisClient from "../config/redis";
 
 const JWT_SECRET = process.env.JWT_SECRET || "";
 const JWT_TOKEN_EXPIRY = process.env.JWT_TOKEN_EXPIRY;
+const CODE_EXPIRY = 300;
 const prisma = new PrismaClient();
 
 async function hashData(data: string) {
@@ -82,5 +84,21 @@ const login = async (req: Request, res: Response) => {
         });
     }
 };
+const resetPassword = (req: Request, res: Response) => {};
 
+const verifyEmail = (req: Request, res: Response) => {};
+
+const sendCode = (req: Request, res: Response) => {};
+
+const setCode = (email: string, code: string) => {
+    redisClient.setEx(email, CODE_EXPIRY, code);
+};
+
+const getCode = (email: string) => {
+    return redisClient.get(email);
+};
+
+const deleteCode = (email: string) => {
+    return redisClient.del(email);
+};
 export { register, login };
