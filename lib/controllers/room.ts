@@ -1,5 +1,7 @@
 import { PrismaClient, Room, User } from "@prisma/client";
 import { Request, Response } from "express";
+import logger from "../logger";
+import { CustomRequest } from "../middlewares/auth";
 import { ComputeResponse } from "../misc";
 
 const prisma = new PrismaClient();
@@ -23,16 +25,9 @@ const getRoom = async (name: string): Promise<any> => {
 const createRoom = async (req: Request, res: Response) => {
     const { name, description } = req.body;
     const image = req.file?.path;
-    let userId;
-    if (res.locals.userId) {
-        userId = res.locals;
-    }
+    const user = (req as CustomRequest).user;
+    logger.info(user);
     try {
-        const user = await prisma.user.findFirst({
-            where: {
-                id: userId,
-            },
-        });
         if (user) {
             const room = await prisma.room.create({
                 data: {

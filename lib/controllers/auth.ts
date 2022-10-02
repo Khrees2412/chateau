@@ -3,10 +3,12 @@ import bcrypt from "bcrypt";
 import * as jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 import { Prisma, PrismaClient } from "@prisma/client";
-import { HTTPStatusCode } from "../misc";
+import { ComputeResponse, HTTPStatusCode } from "../misc";
 import redisClient from "../config/redis";
+import SendMail, { IMailData } from "../config/mail";
+import logger from "../logger";
 
-const JWT_SECRET = process.env.JWT_SECRET || "";
+const JWT_SECRET = process.env.JWT_SECRET || "super";
 const JWT_TOKEN_EXPIRY = process.env.JWT_TOKEN_EXPIRY;
 const CODE_EXPIRY = 300;
 const prisma = new PrismaClient();
@@ -16,21 +18,27 @@ async function hashData(data: string) {
 }
 
 const register = async (req: Request, res: Response) => {
-    const { username, password, email } = req.body;
-    const pw = await hashData(password);
-
-    const user = await prisma.user.create({
-        data: {
-            username,
-            email,
-            password: pw,
-        },
-    });
-    res.status(HTTPStatusCode.CREATED).json({
-        success: true,
-        message: "User created successfully",
-        data: user.username,
-    });
+    try {
+        const { username, password, email } = req.body;
+        const pw = await hashData(password);
+        const user = await prisma.user.create({
+            data: {
+                username,
+                email,
+                password: pw,
+                active: false,
+            },
+        });
+        res.status(HTTPStatusCode.CREATED).json({
+            success: true,
+            message: "User created successfully",
+            data: user.username,
+        });
+    } catch (error) {
+        res.status(HTTPStatusCode.BAD_REQUEST).json(
+            ComputeResponse(false, "Error occurred", error)
+        );
+    }
 };
 
 const login = async (req: Request, res: Response) => {
@@ -84,11 +92,53 @@ const login = async (req: Request, res: Response) => {
         });
     }
 };
-const resetPassword = (req: Request, res: Response) => {};
+const resetPassword = (req: Request, res: Response) => {
+    const { code } = req.body;
+};
 
 const verifyEmail = (req: Request, res: Response) => {};
 
-const sendCode = (req: Request, res: Response) => {};
+const sendCode = async (req: Request, res: Response) => {
+    const { email } = req.body;
+    try {
+        const user = await prisma.user.findFirst({
+            where: {
+                email,
+            },
+        });
+        const code = randomCodeGenerator();
+        setCode(email, code);
+        const data: IMailData = {
+            email,
+            name: user ? user.username : "Hi there!",
+            subject: "Chateau Code",
+            text: `Your Chateau code is ${code}. You can finish up your registration`,
+        };
+        SendMail(data);
+        res.json(ComputeResponse(true, "Sent Code to email address!"));
+    } catch (error) {
+        logger.error(error);
+        res.json(
+            ComputeResponse(
+                false,
+                "Something went wrong while sending code",
+                error
+            )
+        );
+    }
+};
+
+const randomCodeGenerator = (num: number = 5) => {
+    const nums = "1326458790";
+    let code: string = "";
+
+    for (let i = 1; i <= num; i++) {
+        const random = Math.floor(Math.random() * 10);
+        code += nums[random];
+    }
+
+    return code;
+};
 
 const setCode = (email: string, code: string) => {
     redisClient.setEx(email, CODE_EXPIRY, code);

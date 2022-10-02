@@ -16,6 +16,7 @@ model User {
   username     String    @unique @db.VarChar(15)
   messages     Message[]
   rooms        Room[]
+  active       Boolean
   createdAt    DateTime  @default(now()) @db.Timestamp(6)
   updatedAt    DateTime  @updatedAt
   refreshToken String?

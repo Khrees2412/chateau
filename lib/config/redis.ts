@@ -4,7 +4,7 @@ import logger from "../logger";
 const REDIS_URL =
     process.env.NODE_ENV === "production"
         ? process.env.REDIS_URL
-        : "localhost:6379";
+        : "redis://localhost:6379";
 
 const redisClient = createClient({ url: REDIS_URL });
 redisClient.on("error", (err) => {

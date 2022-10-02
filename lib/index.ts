@@ -9,6 +9,7 @@ import roomRouter from "./routes/room";
 import morganMiddleware from "./middlewares/morgan";
 import logger from "./logger";
 import path from "path";
+import authRouter from "./routes/auth";
 
 const app: Application = express();
 const dev = process.env.NODE_ENV !== "production";
@@ -64,6 +65,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use("/v1/rooms", roomRouter);
+app.use("/v1/auth", authRouter);
 
 connection(io);
 

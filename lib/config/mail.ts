@@ -1,4 +1,5 @@
 import Mailjet from "node-mailjet";
+import { v4 as uuid } from "uuid";
 import logger from "../logger";
 
 const mailjet = new Mailjet({
@@ -9,18 +10,16 @@ const mailjet = new Mailjet({
     },
 });
 
-interface IMailData {
+export interface IMailData {
     email: string;
     name: string;
     subject: string;
     text: string;
     html?: string;
-    userId: string;
 }
 
-const ComputeRandomId = (userId: string): string => {
-    if (!userId) throw new Error("User ID must be passed");
-    return "chateau" + userId + Date.now();
+const ComputeRandomId = (): string => {
+    return "chateau" + uuid + Date.now();
 };
 
 const SendMail = async (data: IMailData) => {
@@ -41,7 +40,7 @@ const SendMail = async (data: IMailData) => {
                     Subject: data.subject,
                     TextPart: data.text,
                     HTMLPart: data.html ? data.html : "",
-                    CustomID: ComputeRandomId(data.userId),
+                    CustomID: ComputeRandomId(),
                 },
             ],
         });
