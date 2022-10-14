@@ -23,27 +23,24 @@ const validateAuth = async (
                 .status(HTTPStatusCode.UNAUTHORIZED)
                 .json("Unauthorized User");
         }
-        const authToken = token.split(" ")[1];
-        const decoded = jwt.verify(authToken, jwtSecret);
-        logger.info(jwtSecret);
 
-        console.log("decoded: ", decoded);
-        if (typeof decoded !== "string") {
-            const user = await prisma.user.findUnique({
-                where: {
-                    id: decoded.id,
-                },
-            });
-            if (!user) {
-                res.json("Unable to decode user or invalid JWT");
+        const authToken = token.split(" ")[1];
+
+        jwt.verify(authToken, jwtSecret, async (err, decoded) => {
+            logger.info(decoded);
+            if (err) {
+                return res.status(HTTPStatusCode.UNAUTHORIZED).json(err);
             }
+
+            const { id } = decoded as { id: string };
+            const user = await prisma.user.findUnique({
+                where: { id },
+            });
             (req as CustomRequest).user = user;
-        }
-        res.json("authenticated");
-        next();
-    } catch (err) {
-        logger.error("something wrong with auth middleware");
-        res.status(HTTPStatusCode.SERVER_ERROR).json({ msg: "Server Error" });
+            next();
+        });
+    } catch (error) {
+        return res.status(HTTPStatusCode.SERVER_ERROR).json(error);
     }
 };
 

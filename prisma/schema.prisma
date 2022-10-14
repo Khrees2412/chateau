@@ -12,24 +12,24 @@ model User {
   socketId     String?
   email        String    @unique
   password     String
-  avatar       String?
   username     String    @unique @db.VarChar(15)
-  messages     Message[]
-  rooms        Room[]
-  active       Boolean
   createdAt    DateTime  @default(now()) @db.Timestamp(6)
   updatedAt    DateTime  @updatedAt
   refreshToken String?
+  active       Boolean
+  avatar       String?
+  messages     Message[]
+  rooms        Room[]
 }
 
 model Message {
   id        String   @id @default(uuid())
   content   String
   senderId  String
-  sender    User     @relation(fields: [senderId], references: [id])
-  room      Room?    @relation(fields: [roomId], references: [id])
-  roomId    String?
+  roomId    String
   createdAt DateTime @default(now()) @db.Timestamp(6)
+  sender    User     @relation(fields: [senderId], references: [id])
+  room      Room     @relation(fields: [roomId], references: [id])
 }
 
 model Room {
@@ -38,9 +38,9 @@ model Room {
   description  String    @db.VarChar(100)
   admin        String
   avatar       String
-  users        User[]
-  messages     Message[]
   messageCount Int
   createdAt    DateTime  @default(now()) @db.Timestamp(6)
   updatedAt    DateTime  @updatedAt
+  messages     Message[]
+  users        User[]
 }

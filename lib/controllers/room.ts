@@ -2,7 +2,7 @@ import { PrismaClient, Room, User } from "@prisma/client";
 import { Request, Response } from "express";
 import logger from "../logger";
 import { CustomRequest } from "../middlewares/auth";
-import { ComputeResponse } from "../misc";
+import { ComputeResponse, HTTPStatusCode } from "../misc";
 
 const prisma = new PrismaClient();
 
@@ -11,6 +11,9 @@ const getRoom = async (name: string): Promise<any> => {
         const room = await prisma.room.findFirst({
             where: {
                 name,
+            },
+            include: {
+                users: true,
             },
         });
         if (!room) {
@@ -23,30 +26,35 @@ const getRoom = async (name: string): Promise<any> => {
 };
 
 const createRoom = async (req: Request, res: Response) => {
-    const { name, description } = req.body;
-    const image = req.file?.path;
-    const user = (req as CustomRequest).user;
-    logger.info(user);
     try {
-        if (user) {
-            const room = await prisma.room.create({
-                data: {
-                    name,
-                    description,
-                    avatar: image ? image : "",
-                    messageCount: 0,
-                    admin: user.username,
-                    users: {
-                        create: user,
-                    },
-                },
-            });
-            res.json(ComputeResponse(true, "Room Created", room.name));
-        } else {
-            res.json(ComputeResponse(false, "Unable to find user"));
+        const { name, description } = req.body;
+        const image = req.file?.path;
+        const user = (req as CustomRequest).user;
+        logger.info(user);
+        if (!user) {
+            return res.json(ComputeResponse(false, "Unable to find user"));
         }
+        const room = await prisma.room.create({
+            data: {
+                name,
+                description,
+                avatar: image ? image : "",
+                messageCount: 0,
+                admin: user.username,
+            },
+        });
+        await addUserToRoom(user, room);
+        const createdRoom = await getRoom(room.name);
+        res.json(
+            ComputeResponse(true, "Room Created", {
+                room: room.name,
+                members: createdRoom.users,
+            })
+        );
     } catch (error) {
-        res.json(ComputeResponse(false, "Error occurred", error));
+        return res
+            .status(HTTPStatusCode.SERVER_ERROR)
+            .json(ComputeResponse(false, "Error occurred", error));
     }
 };
 
