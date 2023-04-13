@@ -1,8 +1,8 @@
 import * as jwt from "jsonwebtoken";
 import { NextFunction, Request, Response } from "express";
-import { HTTPStatusCode } from "../misc";
+import { HTTPStatusCode } from "../utils/misc";
 import { PrismaClient, User } from "@prisma/client";
-import logger from "../logger";
+import logger from "../utils/logger";
 
 const prisma = new PrismaClient();
 const jwtSecret = process.env.JWT_SECRET || "super";

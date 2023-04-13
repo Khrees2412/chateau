@@ -1,6 +1,6 @@
 import { PrismaClient, Room, User } from "@prisma/client";
 import { Request, Response } from "express";
-import { ComputeResponse } from "../misc";
+import { ComputeResponse } from "../utils/misc";
 
 const prisma = new PrismaClient();
 

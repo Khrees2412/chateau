@@ -1,13 +1,13 @@
 import express, { Application, Request, Response } from "express";
 import dotenv from "dotenv";
-import { HTTPStatusCode } from "./misc";
+import { HTTPStatusCode } from "./utils/misc";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { collectDefaultMetrics, register, Histogram } from "prom-client";
 import connection from "./controllers/socket";
 import roomRouter from "./routes/room";
 import morganMiddleware from "./middlewares/morgan";
-import logger from "./logger";
+import logger from "./utils/logger";
 import path from "path";
 import authRouter from "./routes/auth";
 

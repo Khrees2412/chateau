@@ -1,6 +1,6 @@
 import Mailjet from "node-mailjet";
 import { v4 as uuid } from "uuid";
-import logger from "../logger";
+import logger from "../utils/logger";
 
 const mailjet = new Mailjet({
     apiKey: process.env.MAILJET_KEY,

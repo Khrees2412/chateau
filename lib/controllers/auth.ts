@@ -3,10 +3,10 @@ import bcrypt from "bcrypt";
 import * as jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 import { Prisma, PrismaClient } from "@prisma/client";
-import { ComputeResponse, HTTPStatusCode } from "../misc";
+import { ComputeResponse, HTTPStatusCode } from "../utils/misc";
 import redisClient from "../config/redis";
 import SendMail, { IMailData } from "../config/mail";
-import logger from "../logger";
+import logger from "../utils/logger";
 
 const JWT_SECRET = process.env.JWT_SECRET || "super";
 const JWT_TOKEN_EXPIRY = process.env.JWT_TOKEN_EXPIRY;
@@ -96,7 +96,13 @@ const resetPassword = (req: Request, res: Response) => {
     const { code } = req.body;
 };
 
-const verifyEmail = (req: Request, res: Response) => {};
+const verifyEmail = async (req: Request, res: Response) => {
+    const code = req.params.code;
+    const redisCode = await getCode(req.body.email);
+    if (code === redisCode) {
+        res.json(ComputeResponse(true, "Email Verified!"));
+    }
+};
 
 const sendCode = async (req: Request, res: Response) => {
     const { email } = req.body;
@@ -114,7 +120,7 @@ const sendCode = async (req: Request, res: Response) => {
             subject: "Chateau Code",
             text: `Your Chateau code is ${code}. You can finish up your registration`,
         };
-        SendMail(data);
+        await SendMail(data);
         res.json(ComputeResponse(true, "Sent Code to email address!"));
     } catch (error) {
         logger.error(error);

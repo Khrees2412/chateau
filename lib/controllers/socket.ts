@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { Server } from "socket.io";
-import logger from "../logger";
+import logger from "../utils/logger";
 
 import { addMessage } from "./message";
 import { getRoom, removeUserFromRoom } from "./room";

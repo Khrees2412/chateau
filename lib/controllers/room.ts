@@ -1,8 +1,8 @@
 import { PrismaClient, Room, User } from "@prisma/client";
 import { Request, Response } from "express";
-import logger from "../logger";
+import logger from "../utils/logger";
 import { CustomRequest } from "../middlewares/auth";
-import { ComputeResponse, HTTPStatusCode } from "../misc";
+import { ComputeResponse, HTTPStatusCode } from "../utils/misc";
 
 const prisma = new PrismaClient();
 
