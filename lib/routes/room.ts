@@ -7,8 +7,8 @@ import {
     deleteRoom,
     getRoomMembers,
     updateRoom,
-} from "../controllers/room";
-import { validateAuth } from "../middlewares/auth";
+} from "../controller/room";
+import { validateAuth } from "../middleware/auth";
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_NAME,

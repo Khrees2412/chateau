@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { Server } from "socket.io";
 import logger from "../utils/logger";
 
-import { addMessage } from "./message";
+import { createMessage } from "./message";
 import { getRoom, removeUserFromRoom } from "./room";
 
 const prisma = new PrismaClient();
@@ -48,7 +48,7 @@ const connection = (io: Server) => {
                 //         },
                 //     });
                 //     if (user) {
-                //         await addMessage(message, room, user.id);
+                //         await createMessage(message, room, user.id);
 
                 io.to(room).emit("sendMessage", message);
             }

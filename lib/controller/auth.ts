@@ -7,6 +7,7 @@ import { ComputeResponse, HTTPStatusCode } from "../utils/misc";
 import redisClient from "../config/redis";
 import SendMail, { IMailData } from "../config/mail";
 import logger from "../utils/logger";
+import {registerService, loginService} from "../service/auth";
 
 const JWT_SECRET = process.env.JWT_SECRET || "super";
 const JWT_TOKEN_EXPIRY = process.env.JWT_TOKEN_EXPIRY;
@@ -19,20 +20,11 @@ async function hashData(data: string) {
 
 const register = async (req: Request, res: Response) => {
     try {
-        const { username, password, email } = req.body;
-        const pw = await hashData(password);
-        const user = await prisma.user.create({
-            data: {
-                username,
-                email,
-                password: pw,
-                active: false,
-            },
-        });
+        const data = registerService(req.body)
         res.status(HTTPStatusCode.CREATED).json({
             success: true,
             message: "User created successfully",
-            data: user.username,
+            data: data.username,
         });
     } catch (error) {
         res.status(HTTPStatusCode.BAD_REQUEST).json(
@@ -92,11 +84,11 @@ const login = async (req: Request, res: Response) => {
         });
     }
 };
-const resetPassword = (req: Request, res: Response) => {
+export const resetPassword = (req: Request, res: Response) => {
     const { code } = req.body;
 };
 
-const verifyEmail = async (req: Request, res: Response) => {
+export const verifyEmail = async (req: Request, res: Response) => {
     const code = req.params.code;
     const redisCode = await getCode(req.body.email);
     if (code === redisCode) {

@@ -4,7 +4,7 @@ import { ComputeResponse } from "../utils/misc";
 
 const prisma = new PrismaClient();
 
-const addMessage = async (
+const createMessage = async (
     content: string,
     roomId: string,
     userId: string
@@ -17,12 +17,22 @@ const addMessage = async (
                 senderId: userId,
             },
         });
-        return "Message added to DB";
+        return ComputeResponse(true, "Message sent successfully", null);
     } catch (error: any) {
         return new Error(error);
     }
 };
 
-const deleteMessage = () => {};
-
-export { addMessage, deleteMessage };
+const deleteMessage = async (messageId: string): Promise<any> => {
+    try {
+        await prisma.message.delete({
+            where: {
+                id: messageId,
+            },
+        });
+        return ComputeResponse(true, "Message deleted successfully", null);
+    } catch (error: any) {
+        return new Error(error);
+    }
+};
+export { createMessage, deleteMessage };
