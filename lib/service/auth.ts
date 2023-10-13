@@ -2,6 +2,9 @@ import bcrypt from "bcrypt";
 import {Request, Response} from "express";
 import {ComputeResponse, HTTPStatusCode} from "../utils/misc";
 import * as jwt from "jsonwebtoken";
+import {supabase} from "../utils/supabase";
+import logger from "../utils/logger";
+import {createUser} from "../repository";
 
 async function hashData(data: string) {
     return await bcrypt.hash(data, 14);
@@ -11,22 +14,41 @@ interface authDTO {
     password:string
     email:string
 }
+const resetPassword = async (email: string) => {
+    await supabase.auth.resetPasswordForEmail('hello@example.com', {
+        redirectTo: 'http://example.com/account/update-password',
+    })
+}
+
+async function signInWithEmail() {
+    const {data, error} = await supabase.auth.signInWithPassword({
+        email: 'example@email.com',
+        password: 'example-password',
+    })
+
+}
+await supabase.auth.updateUser({password: user.password})
+
+async function signOut() {
+    const {error} = await supabase.auth.signOut()
+}
 
 const registerService = async (body: authDTO) => {
-    try {
         const { username, password, email } = body;
         const pw = await hashData(password);
-        const user = await prisma.user.create({
-            data: {
-                username,
-                email,
-                password: pw,
-                active: false,
-            },
-        });
-
+        try {
+            const {data, error} = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password,
+            }
+         await createUser({
+             username: username,
+             email: email,
+             password: pw,
+         })
+        return data.user
     } catch (error) {
-
+logger.error(error)
     }
 };
 

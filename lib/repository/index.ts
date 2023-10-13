@@ -1,52 +1,46 @@
 const JWT_SECRET = process.env.JWT_SECRET || "super";
 const JWT_TOKEN_EXPIRY = process.env.JWT_TOKEN_EXPIRY;
 const CODE_EXPIRY = 300;
-import { Prisma, PrismaClient } from "@prisma/client";
+import {PrismaClient} from "@prisma/client";
+
 
 const prisma = new PrismaClient();
 
 
-/**
- *
- * Create(user *models.User) error
- *    FindByUserId(userId string) (*models.User, error)
- *    FindByMonoId(monoId string) (*models.User, error)
- *    FindByEmail(email string) (*models.User, error)
- *    Update(user *models.User) error
- *    DoesUsernameExist(username string) (bool, error)
- *    DoesEmailExist(email string) (bool, error)
- *    DoesPhoneNumberExist(phoneNumber string) (bool, error)
- *
- */
-
 interface createUserDTO {
+    username: string
+    password: string
+    email: string
+}
+
+
+
+export const createUser = async (user: createUserDTO) => {
+   try {
+       const createdUser = await prisma.user.create({
+           data: {
+               username: user.username,
+               email: user.email,
+               password: user.password,
+               active: false,
+           },
+       });
+       return createdUser
+   }catch (e) {
+       return e
+   }
+
+}
+const findUserById = (userId: string) => {
+
+}
+const findUserByUsername = (username: string) => {
 
 }
 
-async function signInWithEmail() {
-    const { data, error } = await supabase.auth.signInWithPassword({
-        email: 'example@email.com',
-        password: 'example-password',
-    })
-}
-
-async function signOut() {
-    const { error } = await supabase.auth.signOut()
-}
-
-const createUser = (user: createUserDTO)   => {
+const findUserByEmail = (email: string) => {
 
 }
-const findUserById = (userId:string) => {
-
-}
-const findUserByUsername = (username:string) => {
-
-}
-
-const findUserByEmail = (email:string) => {
-
-}
-const updateUser = (user: createUserDTO) => {
+const updateUser = async (user: createUserDTO) => {
 
 }
