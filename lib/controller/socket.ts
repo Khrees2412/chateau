@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { Server } from "socket.io";
 import logger from "../utils/logger";
 
-import { createMessage } from "./message";
+import { sendMessage } from "./message";
 import { getRoom, removeUserFromRoom } from "./room";
 
 const prisma = new PrismaClient();

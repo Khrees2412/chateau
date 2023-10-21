@@ -25,9 +25,16 @@ const getRoom = async (name: string): Promise<any> => {
     }
 };
 
+interface CreateRoomRequest {
+    name:string
+    description: string
+    participantLimit: number
+}
+
 const createRoom = async (req: Request, res: Response) => {
     try {
-        const { name, description } = req.body;
+        const body: CreateRoomRequest = req.body
+        const { name, description, participantLimit } = req.body;
         const image = req.file?.path;
         const user = (req as CustomRequest).user;
         logger.info(user);
@@ -41,6 +48,7 @@ const createRoom = async (req: Request, res: Response) => {
                 avatar: image ? image : "",
                 messageCount: 0,
                 admin: user.username,
+                participantLimit
             },
         });
         await addUserToRoom(user, room);

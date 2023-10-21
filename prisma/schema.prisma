@@ -27,20 +27,22 @@ model Message {
   content   String
   senderId  String
   roomId    String
+  type      String   @db.VarChar(10) //  text, file (video, audio, image, document)
   createdAt DateTime @default(now()) @db.Timestamp(6)
   sender    User     @relation(fields: [senderId], references: [id])
   room      Room     @relation(fields: [roomId], references: [id])
 }
 
 model Room {
-  id           String    @id @default(uuid())
-  name         String    @unique @db.VarChar(25)
-  description  String    @db.VarChar(100)
-  admin        String
-  avatar       String
-  messageCount Int
-  createdAt    DateTime  @default(now()) @db.Timestamp(6)
-  updatedAt    DateTime  @updatedAt
-  messages     Message[]
-  users        User[]
+  id                String    @id @default(uuid())
+  name              String    @unique @db.VarChar(25)
+  description       String    @db.VarChar(100)
+  admin             String
+  avatar            String
+  participantLimit  Int
+  messageCount      Int
+  createdAt         DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt         DateTime  @updatedAt
+  messages          Message[]
+  users             User[]
 }

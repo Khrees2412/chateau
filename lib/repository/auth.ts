@@ -1,10 +1,7 @@
 const JWT_SECRET = process.env.JWT_SECRET || "super";
 const JWT_TOKEN_EXPIRY = process.env.JWT_TOKEN_EXPIRY;
 const CODE_EXPIRY = 300;
-import {PrismaClient} from "@prisma/client";
-
-
-const prisma = new PrismaClient();
+import {prisma} from "../../prisma/prisma";
 
 
 interface createUserDTO {

@@ -1,38 +1,36 @@
-import { PrismaClient, Room, User } from "@prisma/client";
-import { Request, Response } from "express";
-import { ComputeResponse } from "../utils/misc";
+import {Request, Response} from "express";
+import {ComputeResponse} from "../utils/misc";
+import MessageService from "../service/message";
 
-const prisma = new PrismaClient();
+const messageService = new MessageService()
 
-const createMessage = async (
-    content: string,
-    roomId: string,
-    userId: string
+const sendMessage = async (
+    req: Request, res: Response
 ): Promise<any> => {
     try {
-        await prisma.message.create({
-            data: {
-                content,
-                roomId,
-                senderId: userId,
-            },
-        });
-        return ComputeResponse(true, "Message sent successfully", null);
-    } catch (error: any) {
-        return new Error(error);
+
+        const userId = ""
+        const {roomId, content, messageType} = req.body
+        const response = messageService.createMessage({
+            senderId: userId,
+            roomId: roomId,
+            content: content,
+            messageType: messageType
+        })
+        return ComputeResponse(true, "Message sent successfully", response);
+    } catch
+        (e) {
+        return ComputeResponse(false, "Unable to send message", e)
     }
-};
+}
+
 
 const deleteMessage = async (messageId: string): Promise<any> => {
     try {
-        await prisma.message.delete({
-            where: {
-                id: messageId,
-            },
-        });
+
         return ComputeResponse(true, "Message deleted successfully", null);
     } catch (error: any) {
         return new Error(error);
     }
 };
-export { createMessage, deleteMessage };
+export {sendMessage, deleteMessage};
