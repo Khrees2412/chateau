@@ -41,7 +41,7 @@ model Room {
   admin             String
   avatar            String
   participantLimit  Int
-  messageCount      Int
+  messageCount      Int       @default(0)
   createdAt         DateTime  @default(now()) @db.Timestamp(6)
   updatedAt         DateTime  @updatedAt
   messages          Message[]

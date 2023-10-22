@@ -4,7 +4,7 @@ import { HTTPStatusCode } from "./utils/misc";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { collectDefaultMetrics, register, Histogram } from "prom-client";
-import connection from "./controller/socket";
+import connection from "./socket";
 import roomRouter from "./routes/room";
 import morganMiddleware from "./middleware/morgan";
 import logger from "./utils/logger";

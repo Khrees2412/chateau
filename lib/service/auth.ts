@@ -1,5 +1,4 @@
 import bcrypt from "bcrypt";
-// import * as jwt from "jsonwebtoken";
 import {supabase} from "../utils/supabase";
 import {AuthError, isAuthError} from "../utils/error";
 import logger from "../utils/logger";
@@ -60,7 +59,11 @@ class AuthService {
                 email: email,
                 password: password,
             });
-            return data.user?.id!;
+            if (error) {
+                logger.error(error);
+                throw error
+            }
+            return data.session?.access_token!;
         } catch (error) {
             if (isAuthError(error)) {
                 return error

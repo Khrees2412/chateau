@@ -4,8 +4,6 @@ import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { v2 as cloudinary } from "cloudinary";
 import {
     createRoom,
-    deleteRoom,
-    getRoomMembers,
     updateRoom,
 } from "../controller/room";
 import { validateAuth } from "../middleware/auth";
@@ -25,9 +23,9 @@ const upload = multer({ storage: storage });
 
 const roomRouter = Router();
 
-roomRouter.get("/members", validateAuth, getRoomMembers);
+roomRouter.get("/members", validateAuth);
 roomRouter.post("/", validateAuth, upload.single("picture"), createRoom);
-roomRouter.delete("/:id", validateAuth, deleteRoom);
+roomRouter.delete("/:id", validateAuth);
 roomRouter.put("/:id", validateAuth, updateRoom);
 
 export default roomRouter;
