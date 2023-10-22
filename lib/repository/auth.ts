@@ -8,9 +8,8 @@ interface createUserDTO {
     username: string
     password: string
     email: string
+    id:string
 }
-
-
 
 export const createUser = async (user: createUserDTO) => {
    try {
@@ -19,7 +18,8 @@ export const createUser = async (user: createUserDTO) => {
                username: user.username,
                email: user.email,
                password: user.password,
-               active: false,
+               active: true,
+               id: user.id
            },
        });
        return createdUser

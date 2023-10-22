@@ -8,7 +8,8 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(uuid())
+  count        Int       @id @default(autoincrement())
+  id           String    @unique
   socketId     String?
   email        String    @unique
   password     String
