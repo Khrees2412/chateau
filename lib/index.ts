@@ -38,7 +38,7 @@ register.setDefaultLabels({
 });
 
 app.get("/room", (req, res) => {
-    res.sendFile(path.resolve(__dirname + "/client/index.html"));
+    res.sendFile(path.resolve(__dirname + "/home.html"));
 });
 
 collectDefaultMetrics({
@@ -89,7 +89,7 @@ app.use((req: Request, res: Response, next) => {
     const responseTimeInMs = Date.now() - res.locals.startEpoch;
 
     httpRequestDurationMicroseconds
-        .labels(req.method, req.route.path, String(res.statusCode))
+        .labels(req.method, "/", String(res.statusCode))
         .observe(responseTimeInMs);
 
     next();

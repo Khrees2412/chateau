@@ -1,4 +1,5 @@
 import RoomRepository from "../repository/room";
+import {Socket} from "socket.io";
 
 
 interface CreateRoomBody {
@@ -19,16 +20,22 @@ class RoomService {
     async createRoom(body: CreateRoomBody) {
         try {
             const room = await roomrepo.create(body)
-
             return room
-
-        }catch (error){
+        } catch (error) {
             throw new Error(error as unknown as string)
         }
-
     }
 
-    async addUserToRoom() {
+    async addUserToRoom(userId: string, room: string, socket: Socket) {
+        try {
+            await socket.join(room)
+            await roomrepo.addUserToRoom({
+                roomId: room,
+                userId: userId
+            })
+        } catch (error) {
+            throw new Error(error as unknown as string)
+        }
 
     }
 
@@ -43,4 +50,13 @@ class RoomService {
     async updateRoom() {
 
     }
+
+    async getRoom(roomId: string) {
+    }
+
+    async getAllRooms() {
+    }
+
 }
+
+export default RoomService

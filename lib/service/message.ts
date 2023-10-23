@@ -1,6 +1,8 @@
 import {supabase} from "../utils/supabase";
 import {getUniqueId, MessageType} from "../utils/misc";
 import {MessageRepo} from "../repository/message";
+import {Socket} from "socket.io";
+
 
 declare type ContentType = string | File
 
