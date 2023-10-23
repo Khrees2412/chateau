@@ -7,7 +7,7 @@
     "author": "Christian Ndu",
     "license": "MIT",
     "scripts": {
-        "build": "tsc --project tsconfig.json",
+        "build": "tsc --project tsconfig.json && node dist/lib/index.js",
         "start": "node dist/index.js",
         "start:dev": "tsc --watch && cd dist && nodemon index",
         "test": "jest --watchAll --detectOpenHandles",
