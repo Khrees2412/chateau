@@ -8,7 +8,7 @@
     "license": "MIT",
     "scripts": {
         "build": "tsc --project tsconfig.json && node dist/lib/index.js",
-        "start:dev": "tsc --watch && cd dist && nodemon index",
+        "start:dev": "tsc --watch && cd dist && nodemon lib/index",
         "test": "jest --watchAll --detectOpenHandles",
         "dev": "concurrently \"npx tsc --watch\" \"nodemon -q lib/index.ts\""
     },
