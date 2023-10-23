@@ -24,6 +24,7 @@ const upload = multer({ storage: storage });
 const roomRouter = Router();
 
 roomRouter.get("/members", validateAuth);
+roomRouter.get("/", validateAuth)
 roomRouter.post("/", validateAuth, upload.single("picture"), createRoom);
 roomRouter.delete("/:id", validateAuth);
 roomRouter.put("/:id", validateAuth, updateRoom);

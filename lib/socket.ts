@@ -1,16 +1,10 @@
-import { Server } from "socket.io";
+import {Server} from "socket.io";
 import logger from "./utils/logger";
 import RoomService from "./service/room"
 import MessageService from "./service/message";
 import {MessageType} from "./utils/misc";
 
 declare type ContentType = string | File
-interface sendMessageDTO {
-    content: ContentType
-    roomId: string
-    senderId: string
-    messageType: string
-}
 
 const roomService = new RoomService()
 const messageService = new MessageService()
@@ -34,14 +28,13 @@ const connection = (io: Server) => {
 
         socket.on(
             "sendMessage",
-            async ({ message, userId, roomId }) => {
+            async ({ message, userId, roomId, messageType }) => {
                 io.to(roomId).emit("sendMessage", message);
                 await messageService.createMessage({
                     content: message,
                     senderId: userId,
                     roomId: roomId,
-                    messageType: MessageType.text
-
+                    messageType: messageType === "text" ? MessageType.text : MessageType.media
                 })
             }
         );
